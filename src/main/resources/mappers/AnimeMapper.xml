@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.mealisallyouneed.model.mapper.AnimeMapper">
+    <resultMap id="AnimeResultMap" type="org.example.mealisallyouneed.model.vo.Anime">
+        <constructor>
+            <arg column="anime_id" javaType="String" name="uuid" />
+            <arg column="title" javaType="String" name="title" />
+            <arg column="description" javaType="String" name="description" />
+            <arg column="created_at" javaType="String" name="createdAt" />
+            <arg column="votes" javaType="Integer" name="votes" />
+            <arg column="imageUrl" javaType="String" name="imageUrl" />
+        </constructor>
+    </resultMap>
+
+    <!-- 새로운 애니메이션 등록 -->
+    <insert id="insertAnime" parameterType="org.example.mealisallyouneed.model.vo.Anime">
+        INSERT INTO animes (anime_id, title, description)
+        VALUES (#{uuid}, #{title}, #{description})
+    </insert>
+
+    <!-- 애니메이션 목록 조회: imageUrl는 기본 빈 문자열로 반환 -->
+    <select id="getAllAnimes" resultMap="AnimeResultMap">
+        SELECT anime_id, title, description,
+               date_add(a.created_at, INTERVAL 9 HOUR) AS created_at,
+               count(anime_vote_id) votes,
+               '' AS imageUrl
+        FROM animes AS a
+                 LEFT JOIN anime_votes USING (anime_id)
+        GROUP BY anime_id
+        ORDER BY created_at
+    </select>
+
+    <insert id="insertAnimeVote" parameterType="String">
+        INSERT INTO anime_votes (anime_id) VALUES (#{uuid})
+    </insert>
+</mapper>
